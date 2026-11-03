@@ -1,0 +1,93 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aipe-magnetics-design"
+version = "0.3.0"
+description = "AIPE Magnetics Design: core-loss and hysteresis models (Steinmetz, iGSE, Bertotti, Jiles-Atherton, data-driven), inductor and transformer design, winding loss, saturation, verification evidence, CLI, MCP server and agent plugins. Reads all magnetic data from aipe-magnetics-database."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "NOASSERTION" }
+authors = [{ name = "Fulong Li" }, { name = "AIPE Magnetics contributors" }]
+keywords = ["magnetics", "power-electronics", "core-loss", "steinmetz", "igse", "jiles-atherton", "transformer", "inductor", "mcp"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  # Database dependency: not on PyPI yet - install it first from GitHub (see README) or via requirements.txt.
+  "aipe-magnetics-database>=0.3.0,<0.4",
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pydantic>=2.5",
+  "jsonschema[format]>=4.23,<5",
+  "referencing>=0.30",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+hdf5 = ["h5py>=3.8"]
+mcp = ["mcp>=2.0,<3"]
+torch = ["torch>=2.1"]
+viz = ["matplotlib>=3.7"]
+mesh = ["gmsh>=4.11"]
+cad = ["cadquery>=2.4"]
+dev = [
+  "h5py>=3.8",
+  "mcp>=2.0,<3",
+  "pytest>=8",
+  "pytest-cov>=5",
+  "anyio>=4",
+  "build>=1.0",
+]
+all = ["h5py>=3.8", "mcp>=2.0,<3"]
+
+[project.scripts]
+aipe-magnetics-design = "aipe_magnetics_design.cli.main:main"
+aipe-magnetics-design-mcp = "aipe_magnetics_design.mcp.server:main"
+# v0.2 command names kept for compatibility
+aipe-magnetics = "aipe_magnetics_design.cli.main:main"
+aipe-magnetics-mcp = "aipe_magnetics_design.mcp.server:main"
+
+[project.urls]
+Homepage = "https://github.com/FulongLi/AIPE-Magnetics-Design"
+Repository = "https://github.com/FulongLi/AIPE-Magnetics-Design"
+Database = "https://github.com/FulongLi/AIPE-Magnetics-Database"
+Changelog = "https://github.com/FulongLi/AIPE-Magnetics-Design/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"aipe_magnetics_design" = [
+  "py.typed",
+  "schemas/**/*.json",
+  "schemas/**/*.md",
+  "models/datadriven/reference/**/*",
+  "verification/evidence/**/*.json",
+  "integrations/aipe_core/schemas/**/*.json",
+  "integrations/aipe_core/schemas/**/*.md",
+  "integrations/aipe_registry/schema/**/*.json",
+  "integrations/aipe_registry/schema/**/*.md",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+  "external: optional tests that need genuine external data or network access; they never skip silently and always report the reason",
+  "slow: long-running convergence or benchmark tests",
+  "hosts: tests that need the Claude Code or Codex CLI hosts installed",
+]
