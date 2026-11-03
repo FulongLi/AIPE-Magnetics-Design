@@ -1,0 +1,62 @@
+name: AIPE Magnetics Design
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+
+env:
+  DATABASE_REPOSITORY: https://github.com/FulongLi/AIPE-Magnetics-Database.git
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install AIPE-Magnetics-Database (same-named branch if it exists, else main)
+        shell: bash
+        run: |
+          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          if git ls-remote --exit-code --heads "$DATABASE_REPOSITORY" "$BRANCH" >/dev/null 2>&1; then REF="$BRANCH";
+          elif git ls-remote --exit-code --heads "$DATABASE_REPOSITORY" feature/database-separation-and-open-data >/dev/null 2>&1; then REF=feature/database-separation-and-open-data;
+          else REF=main; fi
+          echo "Database ref: $REF"
+          python -m pip install --upgrade pip
+          python -m pip install "aipe-magnetics-database @ git+${DATABASE_REPOSITORY}@${REF}"
+      - name: Install package with development extras
+        run: python -m pip install -e ".[dev]"
+      - name: Unit, model, design, API, MCP, plugin and integration tests
+        run: python -m pytest -q
+      - name: Verification suite (evidence must match the bundled file)
+        run: python -m aipe_magnetics_design.cli.main verify --output reports/verification --check-bundled
+      - name: DAB 10 kW transformer demonstration (offline)
+        if: always()
+        run: python -m aipe_magnetics_design.cli.main demo dab-10kw --output reports/demo
+      - name: Database -> Design example
+        run: python examples/database_to_design.py
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.os }}-py${{ matrix.python }}
+          path: reports/
+
+  plugins:
+    name: plugin packaging checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install "aipe-magnetics-database @ git+${DATABASE_REPOSITORY}@feature/database-separation-and-open-data" || python -m pip install "aipe-magnetics-database @ git+${DATABASE_REPOSITORY}@main"
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest -q tests/plugins

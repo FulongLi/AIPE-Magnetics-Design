@@ -1,0 +1,21 @@
+{
+  "name": "aipe-magnetics-design",
+  "owner": {
+    "name": "AIPE (AI for Power Engineering)",
+    "url": "https://github.com/FulongLi"
+  },
+  "metadata": {
+    "description": "AIPE Magnetics: standalone magnetic engineering expert (materials, core loss, inductor and transformer design, verification) for Claude Code and Codex.",
+    "version": "0.3.0"
+  },
+  "plugins": [
+    {
+      "name": "aipe-magnetics-design",
+      "source": "./plugins/claude/aipe-magnetics-design",
+      "description": "Magnetic material analysis, inductor design, transformer design, loss modelling and engineering review backed by the aipe-magnetics-design Python engine and its local MCP server.",
+      "version": "0.3.0",
+      "category": "engineering",
+      "tags": ["magnetics", "power-electronics", "transformer", "inductor", "core-loss", "mcp"]
+    }
+  ]
+}

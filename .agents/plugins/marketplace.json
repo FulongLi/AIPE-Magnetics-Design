@@ -1,0 +1,19 @@
+{
+  "name": "aipe-magnetics-design",
+  "interface": {
+    "displayName": "AIPE Magnetics"
+  },
+  "plugins": [
+    {
+      "name": "aipe-magnetics-design",
+      "source": "./plugins/codex/aipe-magnetics-design",
+      "description": "Magnetic material analysis, inductor design, transformer design, loss modelling and engineering review backed by the aipe-magnetics-design Python engine and its local MCP server.",
+      "version": "0.3.0",
+      "category": "Engineering",
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      }
+    }
+  ]
+}
